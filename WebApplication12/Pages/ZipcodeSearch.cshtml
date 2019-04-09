@@ -1,0 +1,121 @@
+﻿@page "/zipcode-search"
+@inject HttpClient Http
+@inject IJSRuntime JSRuntime
+@using System.ComponentModel.DataAnnotations
+
+<h1>ZipCode - Search</h1>
+<p>This component demonstrates Search ZipCode the Brazil</p>
+<EditForm Model="@EditFormZipCodeViewModel" OnValidSubmit="@HandleValidSubmit">
+    <div class="">
+        <div class="text-center">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+        </div>
+        <div class="text-center">
+            <div class="form-group pt-2">
+                <label for="zip">Digite o CEP (exemplo: 01414000)</label>
+                <InputText id="zip" bind-Value="@EditFormZipCodeViewModel.Zip" class="form-control" />
+            </div>
+            <div class="pb-3">
+                @if (!IsBtnDisabled)
+                {
+                    <button type="submit" class="btn btn-success" disabled="@IsBtnDisabled">Buscar</button>
+                }
+                @if (IsBtnDisabled)
+                {
+                    <button type="button" id="btncancel" class="btn btn-primary" onclick="@CancelSearchAsync" disabled="@(!IsBtnDisabled)">Cancelar</button>
+                }
+            </div>
+        </div>
+        @if (ZipCodeResult != null)
+        {
+            <div class="alert alert-success pb-2" role="alert">
+                <h4 class="alert-heading">Busca foi um sucesso !!!</h4>
+                <hr>
+                <p class="mb-0">
+                    <ul class="list-group list-group-flush">
+                        <CoLi Css="list-group-item" Value="@ZipCodeResult.Cep"></CoLi>
+                        <CoLi Css="list-group-item" Value="@ZipCodeResult.Logradouro"></CoLi>
+                        <CoLi Css="list-group-item" Value="@ZipCodeResult.Localidade"></CoLi>
+                        <CoLi Css="list-group-item" Value="@ZipCodeResult.Uf"></CoLi>
+                        <CoLi Css="list-group-item" Value="@ZipCodeResult.Bairro"></CoLi>
+                        <CoLi Css="list-group-item" Value="@ZipCodeResult.Complemento"></CoLi>
+                        <CoLi Css="list-group-item" Value="@ZipCodeResult.Gia"></CoLi>
+                        <CoLi Css="list-group-item" Value="@ZipCodeResult.Ibge"></CoLi>
+                        <CoLi Css="list-group-item" Value="@ZipCodeResult.Unidade"></CoLi>
+                    </ul>
+                </p>
+            </div>
+        }
+    </div>
+</EditForm>
+
+@functions {
+    ZipCodeViewModel EditFormZipCodeViewModel = new ZipCodeViewModel();
+    const string ValidationRegexZip = "[0-9]{8}";    
+    ZipCode ZipCodeResult = null;
+    bool IsBtnDisabled = false;
+    Microsoft.AspNetCore.Components.ElementRef a;
+
+    protected override async Task OnInitAsync()
+    {        
+        await CancelSearchAsync();
+    }
+
+    async Task CancelSearchAsync()
+    {
+        EditFormZipCodeViewModel.Zip = string.Empty;
+        IsBtnDisabled = false;
+        ZipCodeResult = null;
+        await JSRuntime.InvokeAsync<bool>("fs.readOnly", "zip");
+        await JSRuntime.InvokeAsync<bool>("fs.setFocus", "zip");
+        StateHasChanged();
+    }
+
+    async Task<ZipCode> SearchAsync()
+    {
+        return await Http.GetJsonAsync<ZipCode>($"https://viacep.com.br/ws/{EditFormZipCodeViewModel.Zip}/json");
+    }
+
+    async Task HandleValidSubmit()
+    {
+        var zip = EditFormZipCodeViewModel.Zip;
+        if (!string.IsNullOrEmpty(zip) && zip.Length == 8 && System.Text.RegularExpressions.Regex.IsMatch(zip, ValidationRegexZip))
+        {
+            ZipCodeResult = await SearchAsync();
+            IsBtnDisabled = !string.IsNullOrEmpty(ZipCodeResult.Cep);
+        }
+        else
+        {
+            IsBtnDisabled = false;
+        }
+        if (IsBtnDisabled)
+        {
+            await JSRuntime.InvokeAsync<bool>("fs.readOnly", "zip", true);
+            await JSRuntime.InvokeAsync<bool>("fs.setFocus", "btncancel");
+        }
+        StateHasChanged();
+    }
+
+    #region Class_Model
+    class ZipCodeViewModel
+    {
+        [Required(ErrorMessage = "Digite o Número do CEP")]
+        [RegularExpression(ValidationRegexZip, ErrorMessage = "Número do CEP é inválido, siga o exemplo: 01414000")]
+        public string Zip { get; set; }
+    }
+
+    class ZipCode
+    {
+        public string Cep { get; set; }
+        public string Logradouro { get; set; }
+        public string Complemento { get; set; }
+        public string Bairro { get; set; }
+        public string Localidade { get; set; }
+        public string Uf { get; set; }
+        public string Unidade { get; set; }
+        public int Ibge { get; set; }
+        public int Gia { get; set; }
+    }
+    #endregion
+}

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8" />
@@ -10,7 +10,33 @@
 </head>
 <body>
     <app>Loading...</app>
-
     <script src="_framework/components.webassembly.js"></script>
+    <script>        
+        window.fs = {
+            getId: (id) => {
+                const obj = window.document.getElementById(id);
+                if (obj) {                    
+                    return obj;
+                }
+                return null;
+            },
+            readOnly : (id, status = false) => {
+                const obj = window.fs.getId(id);
+                if (obj) {
+                    obj.readOnly = status;
+                    return true;
+                }                
+                return false;
+            },
+            setFocus: (id) => {              
+                const obj = window.fs.getId(id);                
+                if (obj) {
+                    obj.focus();
+                    return true;
+                }
+                return false;
+            }
+        }
+    </script>
 </body>
 </html>

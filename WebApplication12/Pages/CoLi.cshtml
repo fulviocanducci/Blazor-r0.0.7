@@ -1,0 +1,11 @@
+﻿@page "/co-li"
+
+@if (!string.IsNullOrEmpty(Value?.ToString()))
+{
+    <li class="@Css">@Value</li>
+}
+
+@functions {
+    [Parameter] object Value { get; set; }
+    [Parameter] string Css { get; set; }
+}
