@@ -52,14 +52,15 @@
 
 @functions {
     ZipCodeViewModel EditFormZipCodeViewModel = new ZipCodeViewModel();
-    const string ValidationRegexZip = "[0-9]{8}";    
+    const string ValidationRegexZip = "[0-9]{8}";
     ZipCode ZipCodeResult = null;
     bool IsBtnDisabled = false;
     Microsoft.AspNetCore.Components.ElementRef a;
 
     protected override async Task OnInitAsync()
-    {        
-        await CancelSearchAsync();
+    {
+        await CancelSearchAsync();    
+        await JSRuntime.InvokeAsync<bool>("fs.maxLength", "zip", 8);
     }
 
     async Task CancelSearchAsync()

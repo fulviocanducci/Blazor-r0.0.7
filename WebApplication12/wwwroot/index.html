@@ -35,6 +35,14 @@
                     return true;
                 }
                 return false;
+            }, 
+            maxLength: (id, value = 0) => {
+                const obj = window.fs.getId(id);                
+                if (obj) {
+                    obj.setAttribute('maxlength', value);                    
+                    return true;
+                }
+                return false;
             }
         }
     </script>
