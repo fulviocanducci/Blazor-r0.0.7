@@ -54,9 +54,8 @@
     ZipCodeViewModel EditFormZipCodeViewModel = new ZipCodeViewModel();
     const string ValidationRegexZip = "[0-9]{8}";
     ZipCode ZipCodeResult = null;
-    bool IsBtnDisabled = false;
-    Microsoft.AspNetCore.Components.ElementRef a;
-
+    bool IsBtnDisabled = false;    
+                
     protected override async Task OnInitAsync()
     {
         await CancelSearchAsync();    
@@ -70,7 +69,7 @@
         ZipCodeResult = null;
         await JSRuntime.InvokeAsync<bool>("fs.readOnly", "zip");
         await JSRuntime.InvokeAsync<bool>("fs.setFocus", "zip");
-        StateHasChanged();
+        //StateHasChanged();
     }
 
     async Task<ZipCode> SearchAsync()
@@ -94,8 +93,8 @@
         {
             await JSRuntime.InvokeAsync<bool>("fs.readOnly", "zip", true);
             await JSRuntime.InvokeAsync<bool>("fs.setFocus", "btncancel");
-        }
-        StateHasChanged();
+        }        
+        //StateHasChanged(); 
     }
 
     #region Class_Model
